@@ -1,189 +1,176 @@
-# Установка панели ScumNeDjin HOST (Wargm v1.1)
+# ScumNeDjin HOST — пакет с Wargm v1.1
 
-Адаптер Wargm-магазина для панели **ScumNeDjin HOST** на выделенном SCUM-сервере (UE4SS).
-Wargm v1.0 API отключён провайдером — работает только **v1.1**. В пакете готовый
-**`version.dll`** (URL Wargm переключён на v1.1) и конфиги v1.1.
-
-> Установка: распаковал, вписал свои ключи, запустил SCUMServer — и всё.
+Просто распаковать, поправить 3 числа в конфиге, запустить SCUMServer.
 
 ---
 
-## 0. Что в `ScumNeDjin-host-portable.zip`
+## Установка (2 минуты)
 
-Структура **как в оригинальном дистрибутиве** `ScumNeDjin HOST V1.2.2 ... DfzVM2F1u.zip`
-(то же раскладочное дерево), только `version.dll` заменён на **патч v1.1**:
-
-```
-BUILD_INFO.json                        ← метаданные сборки
-HOSTING_COMPATIBILITY_RU.md            ← заметки о совместимости
-INSTALL_CLIENTS_RU.md / INSTALL_RU.txt ← инструкция по клиентам
-MANIFEST.txt                           ← манифест (wargm_shop=OK, native_trader=MISSING и т.д.)
-PANEL_ACCESS.txt                       ← доступ к панели
-RELEASE_NOTES_RU.txt                   ← релиз-ноуты
-UE4SS-settings.ini                     ← конфиг UE4SS
-UE4SS.dll                              ← UE4SS runtime
-version.dll                            ← ПАТЧЕННЫЙ бинар (Wargm → v1.1)  ← ЕДИНСТВЕННАЯ ЗАМЕНА
-Mods/
-└── ScumNeDjinBridge/                  ← UE4SS-мост (scripts/main.lua, data/, enabled.txt)
-ScumNeDjin/
-├── nedjin.ini                         ← конфиг панели (порт, api_key, bridge_dir)
-├── bin/
-│   └── e_sqlite3.dll                  ← sqlite-зависимый бинар панели
-├── configs/
-│   ├── wargm-shop.json                ← ВПИШИ СВОИ ProjectId / ApiKey / WargmServerId
-│   └── *.json                         ← остальные модули панели (vip, bounty, ...)
-├── data/
-│   ├── item_data.json                 ← каталог предметов
-│   ├── es_actor_map.json
-│   └── map.png
-├── lang/
-│   ├── ru.json
-│   └── en.json
-└── web/
-    ├── app.js  index.html  panel.html ...  ← веб-UI панели (порт 7084)
-    └── (actor/item/spawnable каталоги)
-```
-
-**НЕ входит в пакет** (создаются при первом запуске на хосте):
-`ScumNeDjin/state/`, `ScumNeDjin/logs/`, `ScumNeDjin/backups/`.
-
-**Что в пакете заменено относительно оригинала:**
-| Файл | Было (оригинал) | Стало (в пакете) |
-|---|---|---|
-| `version.dll` | `https://api.wargm.ru/v1/` (v1.0, отключён) | `https://api.wargm.ru/v1.1/` (v1.1) |
-| `ScumNeDjin/configs/wargm-shop.json` | — | `Enabled:false`, `ProjectId:0`, `ApiKey:""`, `WargmServerId:0` (чисто, вписать своё) |
-
-Все остальные файлы — **однако** оригинальному дистрибутиву.
-
----
-
-## 1. Куда что положить (каталоги)
-
-`<SCUM>` — корень SCUM-сервера (например `D:\LGSSManagers\Servers\Server1\SCUM`).
-Разрактикуй zip **поверх** `Win64/` (структура zip = структура дистрибутива):
-
-| Из zip | Куда положить | Зачем |
-|---|---|---|
-| `version.dll` | `<SCUM>\Binaries\Win64\version.dll` | Wargm URL → v1.1 |
-| `UE4SS.dll`, `UE4SS-settings.ini` | `<SCUM>\Binaries\Win64\` | UE4SS runtime |
-| `Mods/` | `<SCUM>\Binaries\Win64\Mods\` | UE4SS-мост ScumNeDjinBridge |
-| `ScumNeDjin/` | `<SCUM>\Binaries\Win64\ScumNeDjin\` | панель |
-| `BUILD_INFO.json`, `MANIFEST.txt`, `*.md`, `*.txt` | `<SCUM>\Binaries\Win64\` | справки |
-
-Итоговая структура:
+### 1. Распаковать
 
 ```
-<SCUM>/Binaries/Win64/
-├── SCUMServer.exe
-├── version.dll                ← из zip (патч Wargm v1.1)
-├── UE4SS.dll, UE4SS-settings.ini
-├── BUILD_INFO.json, MANIFEST.txt, ...
-├── Mods/
-│   └── ScumNeDjinBridge/      ← mост
-└── ScumNeDjin/
+D:\SCUM\
+└── Binaries\
+    └── Win64\          ← сюда распаковать содержимое zip
+```
+
+В итоге в `Win64/` появятся/обновятся:
+
+```
+Win64/
+├── version.dll          ← патч Wargm v1.1 (уже в zip)
+├── UE4SS.dll
+├── UE4SS-settings.ini
+├── BUILD_INFO.json
+├── HOSTING_COMPATIBILITY_RU.md
+├── INSTALL_CLIENTS_RU.md
+├── INSTALL_RU.txt
+├── MANIFEST.txt
+├── PANEL_ACCESS.txt
+├── RELEASE_NOTES_RU.txt
+├── Mods\
+│   ├── mods.txt
+│   └── ScumNeDjinBridge\
+│       ├── enabled.txt
+│       ├── data\
+│       │   ├── es_actor_map.json
+│       │   └── item_data.json
+│       └── scripts\
+│           └── main.lua
+└── ScumNeDjin\
     ├── nedjin.ini
-    ├── bin/e_sqlite3.dll
-    ├── configs/wargm-shop.json   ← вписать ключи
-    ├── data/ ...
-    ├── lang/ ...
-    └── web/ ...
+    ├── bin\
+    │   └── e_sqlite3.dll
+    ├── configs\
+    │   ├── wargm-shop.json    ← ЗДЕСЬ ВПИШИТЬ СВОЁ (см. ниже)
+    │   ├── armory-command.json
+    │   ├── bounty-hunt.json
+    │   ├── bridge-safety.json
+    │   ├── character-packs.json
+    │   ├── daily-pack.json
+    │   ├── discord-log.json
+    │   ├── fast-travel.json
+    │   ├── home-system.json
+    │   ├── private-messages.json
+    │   ├── scheduled-events.json
+    │   ├── sector-scan.json
+    │   ├── server-kill-feed.json
+    │   ├── vehicle-rental.json
+    │   ├── vip-system.json
+    │   ├── welcome-pack.json
+    │   └── zombie-infection.json
+    ├── data\
+    │   ├── es_actor_map.json
+    │   ├── item_data.json
+    │   └── map.png
+    ├── lang\
+    │   ├── ru.json
+    │   └── en.json
+    └── web\
+        ├── app.js
+        ├── app.css
+        ├── index.html
+        ├── panel.html
+        ├── favicon.ico
+        ├── item-icons-manifest.json
+        ├── scum-nedjin-profile.jpg
+        ├── actor-catalog.json
+        ├── actor-catalog-lite.json
+        ├── placeable-recipes.json
+        ├── spawnable-items.json
+        ├── spawnable-items-lite.json
+        └── spawnable-vehicles.json
 ```
 
-> Не дублируй `version.dll` в `ScumNeDjin/` — он лежит **рядом с `SCUMServer.exe`**.
+### 2. Вписать свои значения
+
+Файл: `Win64\ScumNeDjin\configs\wargm-shop.json`
+
+Вписать только 3 значения:
+
+| Поле | Что вписать | Пример |
+|---|---|---|
+| `"ProjectId"` | Твой Wargm project ID | `3856` |
+| `"ApiKey"` | Твой Wargm API key | `Mb3_eApB_...` |
+| `"WargmServerId"` | ID сервера в Wargm | `81527` |
+
+Все остальные v1.1-поля (`api_base`, `sync_endpoint`, `operation_*_endpoint`)
+уже прописаны в конфиге — не менять.
+
+`"Enabled": false` (сейчас в пакете) → поставить `true`, когда готов.
+
+### 3. Запустить
+
+```
+SCUMServer.exe
+```
+
+Панель: `http://<host>:7084/` (порт из `nedjin.ini`).
 
 ---
 
-## 2. Вписать свои ключи Wargm
+## Проверка
 
-Открой `<SCUM>\Binaries\Win64\ScumNeDjin\configs\wargm-shop.json`:
-
-```jsonc
-{
-  "Enabled": true,
-  "ProjectId": 3856,            // твой project id в Wargm
-  "ApiKey": "***",        // твой Wargm API key
-  "WargmServerId": 81527,      // ID сервера в Wargm
-  "version": "1.1",            // уже в пакете (v1.1)
-  "sync_endpoint": "/shop/operations",
-  "sync_query_status": "pending",
-  "operation_success_endpoint": "/shop/operation_success",
-  "operation_claim_endpoint": "/shop/operation_claim",
-  "operation_cancel_endpoint": "/shop/operation_cancel",
-  ...
-}
-```
-
-> `api_base` может отсутствовать как ключ — бинар V1.2.2 читает `version` +
-> `sync_endpoint` + `operation_*_endpoint`. В пакете `version: "1.1"` уже
-> прописан. При необходимости дополни `"api_base": "https://api.wargm.ru/v1.1/shop"`.
-
----
-
-## 3. Запустить
-
-```
-старт SCUMServer.exe
-```
-
-> Если сервер крутится и держит `version.dll`/`UE4SS.dll` — останови,
-> распакуй поверх, запусти обратно.
-
-Панель поднимет HTTP на порту из `nedjin.ini` (по умолчанию **7084**).
-
-Проверки:
-- `http://<host>:7084/` — веб-панель
-- `http://<host>:7084/api/wargm/pending` — очередь покупок Wargm
-- журнал выдачи: `<SCUM>\Binaries\Win64\ScumNeDjin\state\wargm-shop.json` (создаётся при старте)
-
----
-
-## 4. Контроль здоровья
-
-В `state/wargm-shop.json` (последние записи):
+Журнал: `Win64\ScumNeDjin\state\wargm-shop.json` (создаётся при первом старте).
 
 | Строка | Здорово | Ошибка |
 |---|---|---|
-| sync | `worker-sync-finished result.ok=true fetched=N` | `api-error http=200 msg=Wargm API вернул ошибку.` |
-| выдача | `deliver-pending-finished issued=N` | `issued=0` при живых покупках |
+| sync | `worker-sync-finished result.ok=true fetched=N` | `api-error msg=Wargm API вернул ошибку.` |
+| выдача | `deliver-pending-finished issued=N` | `issued=0` |
 | confirm | `confirmResult scanned=N acked=N` | `acked=0` |
 
-Если ошибка: (а) `version.dll` в `Win64/` — v1.1? (б) ключи `wargm-shop.json`?
-(в) `WargmServerId` совпадает с Wargm?
+Признак ошибки `Wargm API вернул ошибку.` → проверь `version.dll` (должен быть
+v1.1, `https://api.wargm.ru/v1.1/`) и ключи в `wargm-shop.json`.
 
 ---
 
-## 5. Tочки Wargm API v1.1 (используются панелью)
+## Tочки Wargm API v1.1
 
 | Метод | Назначение |
 |---|---|
 | `GET  /v1.1/shop/info` | инфо по магазину |
-| `GET  /v1.1/shop/operations?status=pending` | очередь покупок (sync) |
-| `POST /v1.1/shop/operation_success` | подтвердить выдачу (тело: `operation_id`) |
+| `GET  /v1.1/shop/operations?status=pending` | очередь покупок |
+| `POST /v1.1/shop/operation_success` | подтвердить выдачу |
 | `POST /v1.1/shop/operation_claim` | забрать выдачу |
 | `POST /v1.1/shop/operation_cancel` | отменить операцию |
 
-Документация провайдера: https://wargm.ru/docs_api
+Документация: https://wargm.ru/docs_api
 
 ---
 
-## 6. Запасной вариант — перепатчить version.dll вручную
+## Что в пакете, что НЕ в пакете
 
-Готовый `version.dll` (v1.1) уже в zip. Если бинар на хосте «чистый»
-(URL `https://api.wargm.ru/v1/`) и нет готового файла:
+**В пакете:** все файлы панели (бинары, конфиги, web, data, lang), `version.dll`
+с патчем v1.1, UE4SS.dll, UE4SS-settings.ini.
+
+**НЕ в пакете (создаются при первом запуске):** `ScumNeDjin/state/`,
+`ScumNeDjin/logs/`, `ScumNeDjin/backups/`.
+
+**Не включено намеренно:** `Thumbs.db`, `UE4SS.log`, `crash_*.dmp`, API-ключи
+(в `wargm-shop.json` ключи пустые, `nedjin.ini` api_key панели — вписать своё).
+
+---
+
+## Если version.dll не работает (запасной вариант)
+
+Если при старте ошибка `Wargm API вернул ошибку.` — проверь что
+`version.dll` содержит v1.1 URL:
 
 ```python
-p = r"<SCUM>\Binaries\Win64\version.dll"
-data = bytearray(open(p, "rb").read())
-i = data.find(b"https://api.wargm.ru/v1/")
-assert i != -1, "Wargm base URL not found in version.dll"
-new_url = b"https://api.wargm.ru/v1.1/"
-for k, c in enumerate(new_url):
-    data[i + k] = c
-data[i + len(new_url)] = 0
-open(p, "wb").write(bytes(data))
-print("patched:", open(p, "rb").read()[i:i + 30])
+import re
+data = open(r"Win64\version.dll", "rb").read()
+if b"https://api.wargm.ru/v1/" in data and b"https://api.wargm.ru/v1.1/" not in data:
+    print("version.dll не патчен — патчим")
+    data = bytearray(data)
+    i = data.find(b"https://api.wargm.ru/v1/")
+    new_url = b"https://api.wargm.ru/v1.1/"
+    for k, c in enumerate(new_url):
+        data[i+k] = c
+    data[i+len(new_url)] = 0
+    open(r"Win64\version.dll", "wb").write(bytes(data))
+    print("ok")
+else:
+    print("version.dll уже v1.1")
 ```
 
-> Запускать при **остановленном** `SCUMServer.exe` — иначе файл заблокирован
-> (`Permission denied`). После патча перезапусти сервер.
-> Проверка: в DLL строка `https://api.wargm.ru/v1.1/`.
+Запускать при остановленном SCUMServer.
