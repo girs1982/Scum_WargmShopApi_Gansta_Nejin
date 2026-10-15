@@ -10,49 +10,76 @@ Wargm v1.0 API отключён провайдером — работает то
 
 ## 0. Что в `ScumNeDjin-host-portable.zip`
 
+Структура **как в оригинальном дистрибутиве** `ScumNeDjin HOST V1.2.2 ... DfzVM2F1u.zip`
+(то же раскладочное дерево), только `version.dll` заменён на **патч v1.1**:
+
 ```
-version.dll                        ← ПАТЧЕННЫЙ бинар (Wargm v1.1). Ставить в Win64/
+BUILD_INFO.json                        ← метаданные сборки
+HOSTING_COMPATIBILITY_RU.md            ← заметки о совместимости
+INSTALL_CLIENTS_RU.md / INSTALL_RU.txt ← инструкция по клиентам
+MANIFEST.txt                           ← манифест (wargm_shop=OK, native_trader=MISSING и т.д.)
+PANEL_ACCESS.txt                       ← доступ к панели
+RELEASE_NOTES_RU.txt                   ← релиз-ноуты
+UE4SS-settings.ini                     ← конфиг UE4SS
+UE4SS.dll                              ← UE4SS runtime
+version.dll                            ← ПАТЧЕННЫЙ бинар (Wargm → v1.1)  ← ЕДИНСТВЕННАЯ ЗАМЕНА
+Mods/
+└── ScumNeDjinBridge/                  ← UE4SS-мост (scripts/main.lua, data/, enabled.txt)
 ScumNeDjin/
-├── nedjin.ini                     ← конфиг панели (порт, api_key, bridge_dir)
+├── nedjin.ini                         ← конфиг панели (порт, api_key, bridge_dir)
 ├── bin/
-│   └── e_sqlite3.dll              ← sqlite-зависимый бинар панели
+│   └── e_sqlite3.dll                  ← sqlite-зависимый бинар панели
 ├── configs/
-│   ├── wargm-shop.json            ← ВПИШИ СВОИ ProjectId / ApiKey / WargmServerId
-│   └── *.json                     ← остальные модули панели (vip, bounty, ...)
+│   ├── wargm-shop.json                ← ВПИШИ СВОИ ProjectId / ApiKey / WargmServerId
+│   └── *.json                         ← остальные модули панели (vip, bounty, ...)
 ├── data/
-│   ├── item_data.json             ← каталог предметов (данные, не секреты)
+│   ├── item_data.json                 ← каталог предметов
 │   ├── es_actor_map.json
 │   └── map.png
 ├── lang/
 │   ├── ru.json
 │   └── en.json
-├── web/
-│   ├── app.js  index.html  panel.html ...  ← веб-UI панели (порт 7084)
-│   └── (actor/item/spawnable каталоги)
-└── INSTALL_RU.txt                 ← краткая памятка (внутри zip)
+└── web/
+    ├── app.js  index.html  panel.html ...  ← веб-UI панели (порт 7084)
+    └── (actor/item/spawnable каталоги)
 ```
 
 **НЕ входит в пакет** (создаются при первом запуске на хосте):
 `ScumNeDjin/state/`, `ScumNeDjin/logs/`, `ScumNeDjin/backups/`.
+
+**Что в пакете заменено относительно оригинала:**
+| Файл | Было (оригинал) | Стало (в пакете) |
+|---|---|---|
+| `version.dll` | `https://api.wargm.ru/v1/` (v1.0, отключён) | `https://api.wargm.ru/v1.1/` (v1.1) |
+| `ScumNeDjin/configs/wargm-shop.json` | — | `Enabled:false`, `ProjectId:0`, `ApiKey:""`, `WargmServerId:0` (чисто, вписать своё) |
+
+Все остальные файлы — **однако** оригинальному дистрибутиву.
 
 ---
 
 ## 1. Куда что положить (каталоги)
 
 `<SCUM>` — корень SCUM-сервера (например `D:\LGSSManagers\Servers\Server1\SCUM`).
+Разрактикуй zip **поверх** `Win64/` (структура zip = структура дистрибутива):
 
-| Файл из zip | Куда положить | Зачем |
+| Из zip | Куда положить | Зачем |
 |---|---|---|
-| `version.dll` | `<SCUM>\Binaries\Win64\version.dll` | Wargm URL → v1.1 (заменив старый) |
-| `ScumNeDjin/` (весь каталог) | `<SCUM>\Binaries\Win64\ScumNeDjin\` | панель |
+| `version.dll` | `<SCUM>\Binaries\Win64\version.dll` | Wargm URL → v1.1 |
+| `UE4SS.dll`, `UE4SS-settings.ini` | `<SCUM>\Binaries\Win64\` | UE4SS runtime |
+| `Mods/` | `<SCUM>\Binaries\Win64\Mods\` | UE4SS-мост ScumNeDjinBridge |
+| `ScumNeDjin/` | `<SCUM>\Binaries\Win64\ScumNeDjin\` | панель |
+| `BUILD_INFO.json`, `MANIFEST.txt`, `*.md`, `*.txt` | `<SCUM>\Binaries\Win64\` | справки |
 
-Итоговая структура после распаковки:
+Итоговая структура:
 
 ```
 <SCUM>/Binaries/Win64/
 ├── SCUMServer.exe
 ├── version.dll                ← из zip (патч Wargm v1.1)
-├── UE4SS.dll, UE4SS-settings.ini, ...
+├── UE4SS.dll, UE4SS-settings.ini
+├── BUILD_INFO.json, MANIFEST.txt, ...
+├── Mods/
+│   └── ScumNeDjinBridge/      ← mост
 └── ScumNeDjin/
     ├── nedjin.ini
     ├── bin/e_sqlite3.dll
@@ -62,8 +89,7 @@ ScumNeDjin/
     └── web/ ...
 ```
 
-> `version.dll` лежит **рядом с `SCUMServer.exe`** (в `Win64/`), внутри
-> `ScumNeDjin/` он **не дублируется**. Не копируй `version.dll` в `ScumNeDjin/`.
+> Не дублируй `version.dll` в `ScumNeDjin/` — он лежит **рядом с `SCUMServer.exe`**.
 
 ---
 
@@ -77,19 +103,19 @@ ScumNeDjin/
   "ProjectId": 3856,            // твой project id в Wargm
   "ApiKey": "***",        // твой Wargm API key
   "WargmServerId": 81527,      // ID сервера в Wargm
-
-  // ниже — v1.1, уже прописано, НЕ менять:
-  "api_base": "https://api.wargm.ru/v1.1/shop",
-  "version": "1.1",
+  "version": "1.1",            // уже в пакете (v1.1)
   "sync_endpoint": "/shop/operations",
   "sync_query_status": "pending",
   "operation_success_endpoint": "/shop/operation_success",
   "operation_claim_endpoint": "/shop/operation_claim",
-  "operation_cancel_endpoint": "/shop/operation_cancel"
+  "operation_cancel_endpoint": "/shop/operation_cancel",
+  ...
 }
 ```
 
-В пакете `ApiKey`/`ProjectId`/`WargmServerId` пустые — впиши свои.
+> `api_base` может отсутствовать как ключ — бинар V1.2.2 читает `version` +
+> `sync_endpoint` + `operation_*_endpoint`. В пакете `version: "1.1"` уже
+> прописан. При необходимости дополни `"api_base": "https://api.wargm.ru/v1.1/shop"`.
 
 ---
 
@@ -99,8 +125,8 @@ ScumNeDjin/
 старт SCUMServer.exe
 ```
 
-> Если сервер уже запущен и держит `version.dll` — останови SCUMServer,
-> скопируй `version.dll` и `ScumNeDjin/`, запусти обратно.
+> Если сервер крутится и держит `version.dll`/`UE4SS.dll` — останови,
+> распакуй поверх, запусти обратно.
 
 Панель поднимет HTTP на порту из `nedjin.ini` (по умолчанию **7084**).
 
@@ -142,8 +168,8 @@ ScumNeDjin/
 
 ## 6. Запасной вариант — перепатчить version.dll вручную
 
-Готовый `version.dll` уже в zip. Если бинар на хосте «чистый» (URL
-`https://api.wargm.ru/v1/`) и нет готового файла:
+Готовый `version.dll` (v1.1) уже в zip. Если бинар на хосте «чистый»
+(URL `https://api.wargm.ru/v1/`) и нет готового файла:
 
 ```python
 p = r"<SCUM>\Binaries\Win64\version.dll"
