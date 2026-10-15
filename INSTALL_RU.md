@@ -1,24 +1,19 @@
-# ScumNeDjin HOST — пакет с Wargm v1.1
+# ScumNeDjin HOST + Wargm v1.1 — установка
 
-Просто распаковать, поправить 3 числа в конфиге, запустить SCUMServer.
+Просто распаковать и поправить конфиги. Никакого «клёпанья» по частям.
 
 ---
 
-## Установка (2 минуты)
+## 1. Распакуй пакет
 
-### 1. Распаковать
+Распакуй `ScumNeDjin-host-portable.zip` **поверх каталога `Binaries\Win64`**
+твоего SCUM-сервера (там, где лежит `SCUMServer.exe`).
 
-```
-D:\SCUM\
-└── Binaries\
-    └── Win64\          ← сюда распаковать содержимое zip
-```
-
-В итоге в `Win64/` появятся/обновятся:
+В итоге в `Win64\` появятся файлы и папки:
 
 ```
-Win64/
-├── version.dll          ← патч Wargm v1.1 (уже в zip)
+Win64\
+├── version.dll                     (патч v1.1 — из пакета)
 ├── UE4SS.dll
 ├── UE4SS-settings.ini
 ├── BUILD_INFO.json
@@ -39,88 +34,81 @@ Win64/
 │           └── main.lua
 └── ScumNeDjin\
     ├── nedjin.ini
-    ├── bin\
-    │   └── e_sqlite3.dll
-    ├── configs\
-    │   ├── wargm-shop.json    ← ЗДЕСЬ ВПИШИТЬ СВОЁ (см. ниже)
-    │   ├── armory-command.json
-    │   ├── bounty-hunt.json
-    │   ├── bridge-safety.json
-    │   ├── character-packs.json
-    │   ├── daily-pack.json
-    │   ├── discord-log.json
-    │   ├── fast-travel.json
-    │   ├── home-system.json
-    │   ├── private-messages.json
-    │   ├── scheduled-events.json
-    │   ├── sector-scan.json
-    │   ├── server-kill-feed.json
-    │   ├── vehicle-rental.json
-    │   ├── vip-system.json
-    │   ├── welcome-pack.json
-    │   └── zombie-infection.json
-    ├── data\
-    │   ├── es_actor_map.json
-    │   ├── item_data.json
-    │   └── map.png
-    ├── lang\
-    │   ├── ru.json
-    │   └── en.json
-    └── web\
-        ├── app.js
-        ├── app.css
-        ├── index.html
-        ├── panel.html
-        ├── favicon.ico
-        ├── item-icons-manifest.json
-        ├── scum-nedjin-profile.jpg
-        ├── actor-catalog.json
-        ├── actor-catalog-lite.json
-        ├── placeable-recipes.json
-        ├── spawnable-items.json
-        ├── spawnable-items-lite.json
-        └── spawnable-vehicles.json
+    ├── bin\e_sqlite3.dll
+    ├── configs\*.json
+    ├── data\*.json
+    ├── lang\*.json
+    └── web\*
 ```
 
-### 2. Вписать свои значения
+> `SCUMServer.exe`, `steam_*.dll`, `tbb12.dll`, `tier0_s64.dll`,
+> `vstdlib_s64.dll`, `EOSSDK-Win64-Shipping.dll`, `OpenImageDenoise.dll`,
+> `steam_appid.txt` и каталог `Content\` — **не из пакета**, уже в `Win64\`
+> как часть самого SCUM-сервера. Не трогай их.
 
-Файл: `Win64\ScumNeDjin\configs\wargm-shop.json`
+Если `version.dll` уже на хосте и занят запущенным `SCUMServer.exe` — сначала
+останови сервер, потом распакуй.
 
-Вписать только 3 значения:
+---
 
-| Поле | Что вписать | Пример |
-|---|---|---|
-| `"ProjectId"` | Твой Wargm project ID | `3856` |
-| `"ApiKey"` | Твой Wargm API key | `Mb3_eApB_...` |
-| `"WargmServerId"` | ID сервера в Wargm | `81527` |
+## 2. Поправь конфиги
 
-Все остальные v1.1-поля (`api_base`, `sync_endpoint`, `operation_*_endpoint`)
-уже прописаны в конфиге — не менять.
+Открой `Win64\ScumNeDjin\configs\wargm-shop.json` и впиши **3 значения**
+(все остальные v1.1-поля уже стоят, не менять):
 
-`"Enabled": false` (сейчас в пакете) → поставить `true`, когда готов.
+```jsonc
+{
+  "Enabled": true,
+  "ProjectId": 3856,                  // ← твой Wargm project id
+  "ApiKey": "***",          // ← твой Wargm API key
+  "WargmServerId": 81527,             // ← ID твоего сервера в Wargm
 
-### 3. Запустить
+  // v1.1-поля (уже в пакете, НЕ менять):
+  "version": "1.1",
+  "api_base": "https://api.wargm.ru/v1.1/shop",
+  "sync_endpoint": "/shop/operations",
+  "sync_query_status": "pending",
+  "operation_success_endpoint": "/shop/operation_success",
+  "operation_claim_endpoint": "/shop/operation_claim",
+  "operation_cancel_endpoint": "/shop/operation_cancel"
+}
+```
+
+По умолчанию в пакете `Enabled:false`, `ProjectId:0`, `ApiKey:""`,
+`WargmServerId:0` — впиши своё.
+
+> `nedjin.ini` (порт панели) и `web/`, `data/`, `lang/` — из пакета, как есть.
+> Секретные ключи в пакете отсутствуют (проверено).
+
+---
+
+## 3. Запусти
 
 ```
 SCUMServer.exe
 ```
 
-Панель: `http://<host>:7084/` (порт из `nedjin.ini`).
+Панель поднимет HTTP на порту из `nedjin.ini` (по умолчанию **7084**).
+
+Проверка:
+- `http://<host>:7084/` — веб-панель
+- `http://<host>:7084/api/wargm/pending` — очередь покупок Wargm
+- журнал: `Win64\ScumNeDjin\state\wargm-shop.json` (создаётся при старте)
 
 ---
 
-## Проверка
+## Контроль здоровья
 
-Журнал: `Win64\ScumNeDjin\state\wargm-shop.json` (создаётся при первом старте).
+Последние записи в `state\wargm-shop.json`:
 
 | Строка | Здорово | Ошибка |
 |---|---|---|
 | sync | `worker-sync-finished result.ok=true fetched=N` | `api-error msg=Wargm API вернул ошибку.` |
-| выдача | `deliver-pending-finished issued=N` | `issued=0` |
+| выдача | `deliver-pending-finished issued=N` | `issued=0` при живых покупках |
 | confirm | `confirmResult scanned=N acked=N` | `acked=0` |
 
-Признак ошибки `Wargm API вернул ошибку.` → проверь `version.dll` (должен быть
-v1.1, `https://api.wargm.ru/v1.1/`) и ключи в `wargm-shop.json`.
+Ошибка `Wargm API вернул ошибку.` → проверь: (а) `version.dll` в `Win64\`
+— v1.1? (б) ключи в `wargm-shop.json`? (в) `WargmServerId` совпадает с Wargm?
 
 ---
 
@@ -129,48 +117,47 @@ v1.1, `https://api.wargm.ru/v1.1/`) и ключи в `wargm-shop.json`.
 | Метод | Назначение |
 |---|---|
 | `GET  /v1.1/shop/info` | инфо по магазину |
-| `GET  /v1.1/shop/operations?status=pending` | очередь покупок |
+| `GET  /v1.1/shop/operations?status=pending` | очередь покупок (sync) |
 | `POST /v1.1/shop/operation_success` | подтвердить выдачу |
 | `POST /v1.1/shop/operation_claim` | забрать выдачу |
 | `POST /v1.1/shop/operation_cancel` | отменить операцию |
 
-Документация: https://wargm.ru/docs_api
+Документация провайдера: https://wargm.ru/docs_api
 
 ---
 
-## Что в пакете, что НЕ в пакете
+## Что в пакете / чего нет
 
-**В пакете:** все файлы панели (бинары, конфиги, web, data, lang), `version.dll`
-с патчем v1.1, UE4SS.dll, UE4SS-settings.ini.
+**В пакете:** `version.dll` (патч v1.1), `UE4SS.dll`, `UE4SS-settings.ini`,
+`Mods/ScumNeDjinBridge/` (мост), `ScumNeDjin/` (панель: bin, configs, data,
+lang, web, nedjin.ini), справочные `*.md`/`*.txt`/`.json` верхнего уровня.
 
-**НЕ в пакете (создаются при первом запуске):** `ScumNeDjin/state/`,
+**Не входит** (создаются при первом запуске): `ScumNeDjin/state/`,
 `ScumNeDjin/logs/`, `ScumNeDjin/backups/`.
 
-**Не включено намеренно:** `Thumbs.db`, `UE4SS.log`, `crash_*.dmp`, API-ключи
-(в `wargm-shop.json` ключи пустые, `nedjin.ini` api_key панели — вписать своё).
+**Не входит** (часть самого SCUM-сервера, не часть панели): `SCUMServer.exe`,
+`steam_*.dll`, `tbb12.dll`, `tier0_s64.dll`, `vstdlib_s64.dll`,
+`EOSSDK-Win64-Shipping.dll`, `OpenImageDenoise.dll`, `Content/`.
 
 ---
 
-## Если version.dll не работает (запасной вариант)
+## Запасной вариант — перепатчить version.dll вручную
 
-Если при старте ошибка `Wargm API вернул ошибку.` — проверь что
-`version.dll` содержит v1.1 URL:
+Готовый `version.dll` (v1.1) уже в пакете. Если вдруг бинар на хосте «чистый»
+(URL `https://api.wargm.ru/v1/`) и нужно перепатчить:
 
 ```python
-import re
-data = open(r"Win64\version.dll", "rb").read()
-if b"https://api.wargm.ru/v1/" in data and b"https://api.wargm.ru/v1.1/" not in data:
-    print("version.dll не патчен — патчим")
-    data = bytearray(data)
-    i = data.find(b"https://api.wargm.ru/v1/")
-    new_url = b"https://api.wargm.ru/v1.1/"
-    for k, c in enumerate(new_url):
-        data[i+k] = c
-    data[i+len(new_url)] = 0
-    open(r"Win64\version.dll", "wb").write(bytes(data))
-    print("ok")
-else:
-    print("version.dll уже v1.1")
+p = r"Win64\version.dll"
+data = bytearray(open(p, "rb").read())
+i = data.find(b"https://api.wargm.ru/v1/")
+assert i != -1, "Wargm base URL not found in version.dll"
+new_url = b"https://api.wargm.ru/v1.1/"
+for k, c in enumerate(new_url):
+    data[i + k] = c
+data[i + len(new_url)] = 0
+open(p, "wb").write(bytes(data))
+print("patched:", open(p, "rb").read()[i:i + 30])
 ```
 
-Запускать при остановленном SCUMServer.
+> При **остановленном** `SCUMServer.exe` (иначе `Permission denied`).
+> После — перезапусти сервер. Проверка: в DLL строка `https://api.wargm.ru/v1.1/`.
